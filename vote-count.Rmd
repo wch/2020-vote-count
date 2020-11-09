@@ -1,0 +1,168 @@
+---
+title: "Vote count plots"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 6, fig.height = 6, message = FALSE)
+```
+
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+library(patchwork)
+
+download.file('https://raw.githubusercontent.com/alex/nyt-2020-election-scraper/master/battleground-state-changes.csv', destfile = 'battleground-state-changes.csv')
+dat <- read_csv('battleground-state-changes.csv')
+
+dat <- dat %>%
+  group_by(state) %>%
+  arrange(timestamp) %>%
+  mutate(
+    state = gsub(" .*", "", state),
+    biden_votes = ifelse(leading_candidate_name == "Biden", leading_candidate_votes, trailing_candidate_votes),
+    trump_votes = ifelse(leading_candidate_name == "Trump", leading_candidate_votes, trailing_candidate_votes),
+    total_counted = biden_votes + trump_votes,
+    total = last(total_counted) + last(votes_remaining),
+    percent_biden = biden_votes / total_counted * 100,
+    percent_trump = trump_votes / total_counted * 100,
+    percent_counted = total_counted / total * 100,
+    advantage_trump = percent_trump - percent_biden
+  )
+
+
+
+state <- dat %>%
+  filter(state == "Arizona")
+ggplot(state, aes(x = percent_counted, y = advantage_trump)) +
+  ggtitle("Arizona") +
+  geom_point() +
+  stat_smooth(geom = "line", method = lm, fullrange = TRUE, se = FALSE,
+    alpha = 0.2, color ="blue") +
+  expand_limits(y = 0, x = 100) +
+  ylab("Advantage Trump\n(positive = Trump is winning)") +
+  xlab("Percent of ballots counted") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 100) +
+  geom_label_repel(
+    aes(label = strftime(timestamp, "%m-%d %H:%M ", tz ="EST", usetz = TRUE)),
+    data = state %>%
+      filter(timestamp == min(timestamp) | timestamp == max(timestamp)),
+    segment.size  = 0.2,
+    segment.color = "grey50",
+    color         = "grey60",
+    hjust         = c(-0.5, 1.5)
+  ) +
+  scale_y_continuous(breaks = scales::breaks_extended(15, Q = c(1, 2, 5))) +
+  scale_x_continuous(breaks = scales::breaks_extended(12, Q = c(1, 2, 5))) +
+  theme_bw()
+
+state <- dat %>%
+  filter(state == "Georgia")
+ggplot(state, aes(x = percent_counted, y = advantage_trump)) +
+  ggtitle("Georgia") +
+  geom_point(size = 1) +
+  stat_smooth(geom = "line", method = lm, fullrange = TRUE, se = FALSE,
+    alpha = 0.2, color ="blue") +
+  expand_limits(y = 0, x = 100) +
+  ylab("Percent advantage Trump") +
+  xlab("Percent of ballots counted") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 100) +
+  geom_label_repel(
+    aes(label = strftime(timestamp, "%m-%d %H:%M ", tz ="EST", usetz = TRUE)),
+    data = state %>%
+      filter(timestamp == min(timestamp) | timestamp == max(timestamp)),
+    segment.size  = 0.2,
+    segment.color = "grey50",
+    color         = "grey60",
+    hjust         = c(-0.5, 1.5)
+  ) +
+  scale_y_continuous(breaks = scales::breaks_extended(15, Q = c(1, 2, 5))) +
+  scale_x_continuous(breaks = scales::breaks_extended(12, Q = c(1, 2, 5))) +
+  theme_bw()
+
+
+state <- dat %>%
+  filter(state == "Pennsylvania")
+ggplot(state, aes(x = percent_counted, y = advantage_trump)) +
+  ggtitle("Pennsylvania") +
+  geom_point(size = 1) +
+  stat_smooth(geom = "line", method = lm, fullrange = TRUE, se = FALSE,
+    alpha = 0.2, color ="blue") +
+  expand_limits(y = -3, x = 100) +
+  ylab("Percent advantage Trump") +
+  xlab("Percent of ballots counted") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 100) +
+  geom_label_repel(
+    aes(label = strftime(timestamp, "%m-%d %H:%M ", tz ="EST", usetz = TRUE)),
+    data = state %>%
+      filter(timestamp == min(timestamp) | timestamp == max(timestamp)),
+    segment.size  = 0.2,
+    segment.color = "grey50",
+    color         = "grey60",
+    hjust         = c(-0.5, 1.5)
+  ) +
+  scale_y_continuous(breaks = scales::breaks_extended(15, Q = c(1, 2, 5))) +
+  scale_x_continuous(breaks = scales::breaks_extended(12, Q = c(1, 2, 5))) +
+  theme_bw()
+
+
+state <- dat %>%
+  filter(state == "Nevada")
+ggplot(state, aes(x = percent_counted, y = advantage_trump)) +
+  ggtitle("Nevada") +
+  geom_point() +
+  stat_smooth(geom = "line", method = lm, fullrange = TRUE, se = FALSE,
+    alpha = 0.2, color ="blue") +
+  expand_limits(y = 0, x = 100) +
+  ylab("Percent advantage Trump") +
+  xlab("Percent of ballots counted") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 100) +
+  geom_label_repel(
+    aes(label = strftime(timestamp, "%m-%d %H:%M ", tz ="EST", usetz = TRUE)),
+    data = state %>%
+      filter(timestamp == min(timestamp) | timestamp == max(timestamp)),
+    segment.size  = 0.2,
+    segment.color = "grey50",
+    color         = "grey60",
+    hjust         = c(1.5, -0.5)
+  ) +
+  scale_y_continuous(breaks = scales::breaks_extended(15, Q = c(1, 2, 5))) +
+  scale_x_continuous(breaks = scales::breaks_extended(12, Q = c(1, 2, 5))) +
+  theme_bw()
+
+state <- dat %>%
+  filter(state == "Alaska")
+ggplot(state, aes(x = percent_counted, y = advantage_trump)) +
+  ggtitle("Alaska") +
+  geom_point() +
+  stat_smooth(geom = "line", method = lm, fullrange = TRUE, se = FALSE,
+    alpha = 0.2, color ="blue") +
+  expand_limits(y = 0, x = 100) +
+  ylab("Percent advantage Trump") +
+  xlab("Percent of ballots counted") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 100) +
+  geom_label_repel(
+    aes(label = strftime(timestamp, "%m-%d %H:%M ", tz ="EST", usetz = TRUE)),
+    data = state %>%
+      filter(timestamp == min(timestamp) | timestamp == max(timestamp)),
+    segment.size  = 0.2,
+    segment.color = "grey50",
+    color         = "grey60",
+    hjust         = c(1.5, -0.5)
+  ) +
+  scale_y_continuous(breaks = scales::breaks_extended(15, Q = c(1, 2, 5))) +
+  scale_x_continuous(breaks = scales::breaks_extended(12, Q = c(1, 2, 5))) +
+  theme_bw()
+
+```
+
