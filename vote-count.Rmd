@@ -15,7 +15,6 @@ library(readr)
 library(dplyr)
 library(ggplot2)
 library(ggrepel)
-library(patchwork)
 
 download.file('https://raw.githubusercontent.com/alex/nyt-2020-election-scraper/master/battleground-state-changes.csv', destfile = 'battleground-state-changes.csv')
 dat <- read_csv('battleground-state-changes.csv')
